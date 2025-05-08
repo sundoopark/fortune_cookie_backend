@@ -91,7 +91,7 @@ flask --app app/app.py run --host=0.0.0.0 --port=8080
 pip install gunicorn
 
 # Run with gunicorn
-gunicorn --bind 0.0.0.0:8080 "app.app:app"
+gunicorn --bind 0.0.0.0:8000 "app.app:app"
 ```
 
 #### Option 3: Using Docker
@@ -100,7 +100,7 @@ Build and run the container locally:
 
 ```bash
 docker build -t fortune-cookie-backend .
-docker run -p 8080:8080 -e AWS_REGION=us-west-2 -e AWS_ACCESS_KEY_ID=your_key -e AWS_SECRET_ACCESS_KEY=your_secret fortune-cookie-backend
+docker run -p 8000:8000 -e AWS_REGION=us-west-2 -e AWS_ACCESS_KEY_ID=your_key -e AWS_SECRET_ACCESS_KEY=your_secret fortune-cookie-backend
 ```
 
 ### Testing Your Local Deployment
