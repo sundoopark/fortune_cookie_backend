@@ -16,7 +16,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -U pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 
 # Copy the shared app code
-COPY app /app
+COPY ./app/app.py /app/app.py
 
 ENV PORT=80
 ENV PYTHONUNBUFFERED=1
@@ -24,4 +24,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE $PORT
 
 # Start Flask app with Gunicorn
-CMD ["gunicorn", "app.app:app", "-b", "0.0.0.0:80", "--timeout", "120", "--worker-class", "gevent", "--workers", "2", "--capture-output", "--log-level", "debug"]
+CMD ["gunicorn", "app:app", "-b", "0.0.0.0:80", "--timeout", "120", "--worker-class", "gevent", "--workers", "2", "--capture-output", "--log-level", "debug"]
