@@ -1,0 +1,43 @@
+version: 0.2
+
+phases:
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  build:
+    on-failure: ABORT
+    commands:
+      - echo "Building the Docker image..."
+      - IMAGE_TAG=${CODEBUILD_BUILD_NUMBER}  # Use build number; alternatively, you can use CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo "IMAGE_TAG - ${IMAGE_TAG}"
+      - docker build -t fortune_cookie_backend .
+      - docker tag fortune_cookie_backend $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/fortune_cookie_backend:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "Pushing the Docker image..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/fortune_cookie_backend:$IMAGE_TAG
+      - echo "Docker image pushed successfully"
+      - echo "Build completed on $(date)"
+
+      # Replace the <IMAGE_URI> placeholder in your taskdef.json with the actual image URI
+      - echo "Updating ECS service with the new image..."
+      - echo "Constructing IMAGE_URI with dynamic tag..."
+      - IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/fortune_cookie_backend:$IMAGE_TAG
+      - echo "Replacing placeholders in task definition..."
+      - sed -e "s|<IMAGE_URI>|$IMAGE_URI|g" -e "s|<AWS_ACCOUNT_ID>|$AWS_ACCOUNT_ID|g" ecs_fargate_task_def.json > new_ecs_fargate_task_def.json
+
+      # Register the new task definition revision
+      - echo "Registering new ECS task definition..."
+      - NEW_TASK_DEF=$(aws ecs register-task-definition --cli-input-json file://new_ecs_fargate_task_def.json)
+      - echo "New task definition registered"
+
+      # Extract the new revision number (assuming you have jq installed in CodeBuild; otherwise, parse using another method)
+      - NEW_REVISION=$(echo $NEW_TASK_DEF | jq -r '.taskDefinition.revision')
+      - echo "New revision is $NEW_REVISION"
+
+      # Update the ECS service with the new task definition revision
+      - aws ecs update-service --cluster survey_ai_backend_flask_app --service flask-api-service --task-definition flask-backend-app:$NEW_REVISION
+      - echo "ECS service update initiated"

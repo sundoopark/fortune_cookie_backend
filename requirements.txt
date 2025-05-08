@@ -1,0 +1,11 @@
+Flask==3.0.3
+flask-cors
+flask-session
+bcrypt
+boto3
+numpy
+pandas
+requests
+python-dotenv
+gunicorn
+gevent
