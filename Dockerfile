@@ -18,7 +18,6 @@ RUN pip install --no-cache-dir -U pip setuptools wheel && pip install --no-cache
 # Copy the shared app code
 COPY app /app
 
-
 ENV PORT=80
 ENV PYTHONUNBUFFERED=1
 
