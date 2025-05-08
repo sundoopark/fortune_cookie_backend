@@ -39,5 +39,5 @@ phases:
       - echo "New revision is $NEW_REVISION"
 
       # Update the ECS service with the new task definition revision
-      - aws ecs update-service --cluster survey_ai_backend_flask_app --service flask-api-service --task-definition flask-backend-app:$NEW_REVISION
+      - aws ecs update-service --cluster fortune-cookie-demo-backend --service demo-flask-app-service --task-definition fortune-cookie-demo-flask-app:$NEW_REVISION
       - echo "ECS service update initiated"
