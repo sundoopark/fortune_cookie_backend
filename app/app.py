@@ -49,6 +49,7 @@ def get_fortune():
         Based on this input: "{user_input}", 
         generate a short, insightful fortune cookie wisdom (maximum 100 characters).
         Make it thoughtful and relevant to the input.
+        
         """
 
         print(f"Generated prompt: {prompt}")
